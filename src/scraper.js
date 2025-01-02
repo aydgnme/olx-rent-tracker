@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const config = require('./config');
 
 class RentScraper {
@@ -10,12 +10,20 @@ class RentScraper {
     // Launch browser with additional settings
     this.browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: '/usr/bin/google-chrome-stable',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-extensions',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
         '--disable-dev-shm-usage'
-      ]
+      ],
+      executablePath: process.env.CHROME_BIN || '/usr/bin/chromium',
+      ignoreHTTPSErrors: true
     });
   }
 
@@ -49,8 +57,6 @@ class RentScraper {
       });
 
       console.log('Elemente găsite, se extrag datele...');
-
-      await page.screenshot({ path: 'debug-screenshot.png' });
 
       const listings = await page.evaluate(() => {
         const items = document.querySelectorAll('[data-cy="l-card"]');
@@ -144,7 +150,6 @@ class RentScraper {
     } catch (error) {
       console.error('Eroare la extragerea datelor OLX:', error);
       console.error('URL cu eroare:', await page.url());
-      await page.screenshot({ path: 'error-screenshot.png' });
       return [];
     } finally {
       await page.close();

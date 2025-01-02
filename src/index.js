@@ -1,6 +1,18 @@
 const RentScraper = require('./scraper');
 const TelegramNotifier = require('./telegram');
 const config = require('./config');
+const http = require('http');
+
+// Create a basic HTTP server to keep the app alive
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Rent Tracker is running!');
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🌐 Server is running on port ${PORT}`);
+});
 
 class RentTracker {
   constructor() {
