@@ -1,18 +1,6 @@
 const RentScraper = require('./scraper');
 const TelegramNotifier = require('./telegram');
 const config = require('./config');
-const http = require('http');
-
-// Create a basic HTTP server to keep the app alive
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Rent Tracker is running!');
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`🌐 Server is running on port ${PORT}`);
-});
 
 class RentTracker {
   constructor() {
@@ -27,10 +15,10 @@ class RentTracker {
       
       // Send initial status message
       await this.notifier.sendMessage({
-        title: '🤖 Bot Active',
-        location: 'Suceava',
+        title: '🤖 Bot Activ',
+        location: config.DEFAULT_CRITERIA.city,
         price: `${config.DEFAULT_CRITERIA.minPrice}€ - ${config.DEFAULT_CRITERIA.maxPrice}€`,
-        rooms: `${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms} oda`,
+        rooms: `${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms} camere`,
         link: config.WEBSITES.OLX
       });
 
@@ -38,21 +26,19 @@ class RentTracker {
       console.log(`📍 Oraș căutat: ${config.DEFAULT_CRITERIA.city}`);
       console.log(`💰 Interval de preț: ${config.DEFAULT_CRITERIA.minPrice}€ - ${config.DEFAULT_CRITERIA.maxPrice}€`);
       console.log(`🚪 Camere: ${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms}`);
-      console.log(`⏰ Interval de verificare: ${config.SCRAPING_INTERVAL / 60000} minute`);
       
-      // Start periodic checks
-      setInterval(async () => {
-        console.log(`\n🔍 Se verifică anunțuri noi... (${new Date().toLocaleTimeString()})`);
-        await this.checkNewListings();
-      }, config.SCRAPING_INTERVAL);
-
-      // Initial check
+      // Check listings
       console.log('\n🔍 Se verifică anunțurile...');
       await this.checkNewListings();
       
+      // Close browser and exit after completion
+      await this.scraper.close();
+      console.log('\n✅ Procesul s-a încheiat, se închide...');
+      process.exit(0);
+      
     } catch (error) {
       console.error('❌ Eroare de inițializare a botului:', error);
-      throw error;
+      process.exit(1);
     }
   }
 
@@ -79,7 +65,7 @@ class RentTracker {
       console.log(`\n📊 Rezumat: ${newListingCount} anunțuri noi notificate`);
       
     } catch (error) {
-      console.error('❌ İlan kontrolünde hata:', error);
+      console.error('❌ Eroare la verificarea anunțurilor:', error);
     }
   }
 
@@ -101,8 +87,8 @@ class RentTracker {
 
       return priceValid && roomsValid;
     } catch (error) {
-      console.error('Kriter kontrolünde hata:', error);
-      console.error('Hatalı ilan:', listing);
+      console.error('Eroare la verificarea criteriilor:', error);
+      console.error('Anunț cu eroare:', listing);
       return false;
     }
   }
