@@ -2,7 +2,9 @@ services:
   - type: web
     name: olx-rent-tracker
     env: node
-    buildCommand: npm install
+    buildCommand: |
+      npm install
+      npx puppeteer browsers install chrome
     startCommand: node src/index.js
     envVars:
       - key: TELEGRAM_BOT_TOKEN
@@ -25,4 +27,29 @@ services:
         value: 3
       - key: CHECK_INTERVAL
         value: 5
-    plan: free 
+    plan: free
+    # Chrome için gerekli bağımlılıklar
+    buildFilter:
+      paths:
+        - package.json
+        - src/**
+    envVars:
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: true
+    packages:
+      - chromium
+      - chromium-browser
+      - libx11-xcb1
+      - libxcomposite1
+      - libxcursor1
+      - libxdamage1
+      - libxi6
+      - libxtst6
+      - libnss3
+      - libcups2
+      - libxss1
+      - libxrandr2
+      - libasound2
+      - libatk1.0-0
+      - libgtk-3-0
+      - libgbm1 

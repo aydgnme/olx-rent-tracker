@@ -14,8 +14,13 @@ class RentScraper {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--window-size=1920x1080'
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-extensions',
+        '--single-process',
+        '--no-zygote'
       ],
+      executablePath: process.env.CHROME_BIN || null,
       defaultViewport: {
         width: 1920,
         height: 1080
