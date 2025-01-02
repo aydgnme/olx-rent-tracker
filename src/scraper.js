@@ -10,16 +10,10 @@ class RentScraper {
     // Launch browser with additional settings
     this.browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: process.env.CHROME_BIN,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-extensions'
+        '--disable-dev-shm-usage'
       ]
     });
   }
