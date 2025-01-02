@@ -17,14 +17,13 @@ class RentScraper {
         '--disable-gpu',
         '--disable-software-rasterizer',
         '--disable-extensions',
+        '--no-first-run',
+        '--no-zygote',
         '--single-process',
-        '--no-zygote'
+        '--disable-dev-shm-usage'
       ],
-      executablePath: process.env.CHROME_BIN || null,
-      defaultViewport: {
-        width: 1920,
-        height: 1080
-      }
+      executablePath: process.env.CHROME_BIN || '/usr/bin/chromium',
+      ignoreHTTPSErrors: true
     });
   }
 
