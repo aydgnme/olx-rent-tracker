@@ -1,9 +1,8 @@
 services:
   - type: web
     name: olx-rent-tracker
-    env: node
-    buildCommand: npm install
-    startCommand: node src/index.js
+    env: docker
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
@@ -25,8 +24,4 @@ services:
         value: 3
       - key: CHECK_INTERVAL
         value: 5
-      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
-        value: "true"
-      - key: CHROME_BIN
-        value: "/usr/bin/chromium"
     plan: free 
