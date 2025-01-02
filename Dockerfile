@@ -1,5 +1,7 @@
 FROM ghcr.io/puppeteer/puppeteer:21.7.0
 
+USER root
+
 # Create app directory
 WORKDIR /usr/src/app
 
@@ -10,8 +12,11 @@ RUN npm ci
 # Bundle app source
 COPY . .
 
-# Set environment variables
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+# Give permissions to Chrome
+RUN chmod -R o+rwx /usr/bin/google-chrome-stable
+
+# Switch back to pptruser
+USER pptruser
 
 # Start the app
 CMD [ "node", "src/index.js" ] 
