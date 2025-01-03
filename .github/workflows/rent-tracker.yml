@@ -20,41 +20,34 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+      
       - name: Cache dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.npm
             ~/.cache/puppeteer
-          key: ${{ runner.os }}-npm-puppeteer-firefox-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-npm-deps-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-npm-puppeteer-firefox-
-            ${{ runner.os }}-npm-puppeteer-
-            ${{ runner.os }}-npm-
+            ${{ runner.os }}-npm-deps-
+            ${{ runner.os }}-
           
       - name: Install dependencies
         run: |
           npm install
           npm ls puppeteer
-        
-      - name: Install Firefox
-        run: |
-          sudo apt-get remove -y firefox || true
-          sudo snap install firefox
-          which firefox
-          firefox --version
           
       - name: Run tracker
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          PUPPETEER_PRODUCT: firefox
-          PUPPETEER_SKIP_DOWNLOAD: true
-          FIREFOX_BIN: /snap/bin/firefox
-          DISPLAY: :99
-          MOZ_HEADLESS: 1
+          CHROME_PATH: $(which chrome)
         run: |
-          sudo Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          echo "Chrome path: $CHROME_PATH"
           echo "Bot başlatılıyor..."
           node src/index.js
         continue-on-error: false 

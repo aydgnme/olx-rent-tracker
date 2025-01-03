@@ -9,9 +9,8 @@ class RentScraper {
   async initialize() {
     console.log('Browser başlatılıyor...');
     this.browser = await puppeteer.launch({
-      headless: true,
-      product: 'firefox',
-      executablePath: process.env.FIREFOX_BIN || '/snap/bin/firefox',
+      headless: 'new',
+      executablePath: process.env.CHROME_PATH,
       defaultViewport: {
         width: 1920,
         height: 1080
@@ -20,15 +19,13 @@ class RentScraper {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--no-zygote',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
         '--disable-extensions',
-        '--window-size=1920,1080'
-      ],
-      timeout: 60000,
-      env: {
-        ...process.env,
-        MOZ_HEADLESS: '1'
-      }
+        '--window-size=1920,1080',
+        '--hide-scrollbars',
+        '--mute-audio'
+      ]
     });
     console.log('Browser başlatıldı');
   }
@@ -37,7 +34,7 @@ class RentScraper {
     const page = await this.browser.newPage();
     
     try {
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0');
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
       
       const cityFormatted = criteria.city.toLowerCase()
         .replace(/ş/g, 's')
