@@ -10,12 +10,12 @@ class RentScraper {
   async initialize() {
     console.log('Browser başlatılıyor...');
     
-    const chromePath = process.env.CHROME_PATH || '/usr/bin/google-chrome-stable';
+    const chromePath = process.env.CHROME_PATH || '/usr/bin/chromium';
     if (!fs.existsSync(chromePath)) {
-      throw new Error(`Chrome bulunamadı: ${chromePath}`);
+      throw new Error(`Chromium bulunamadı: ${chromePath}`);
     }
     
-    console.log('Chrome path:', chromePath);
+    console.log('Chromium path:', chromePath);
     
     this.browser = await puppeteer.launch({
       headless: 'new',
