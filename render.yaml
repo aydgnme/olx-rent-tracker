@@ -3,6 +3,10 @@ services:
     name: olx-rent-tracker
     env: docker
     dockerfilePath: ./Dockerfile
+    plan: starter
+    scaling:
+      minInstances: 1
+      maxInstances: 1
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
@@ -10,7 +14,9 @@ services:
         sync: false
       - key: CHROME_PATH
         value: /usr/bin/google-chrome-stable
+      - key: DISPLAY
+        value: ":99.0"
     disk:
-      name: tmp
+      name: chrome-data
       mountPath: /tmp
       sizeGB: 1 
