@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer');
 const config = require('./config');
 
 class RentScraper {
@@ -7,31 +7,29 @@ class RentScraper {
   }
 
   async initialize() {
-    // Launch browser with additional settings
+    console.log('Browser başlatılıyor...');
     this.browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--disable-extensions',
         '--no-first-run',
         '--no-zygote',
         '--single-process',
-        '--disable-dev-shm-usage'
-      ],
-      executablePath: process.env.CHROME_BIN || '/usr/bin/chromium',
-      ignoreHTTPSErrors: true
+        '--disable-extensions'
+      ]
     });
+    console.log('Browser başlatıldı');
   }
 
   async scrapeOLX(criteria) {
     const page = await this.browser.newPage();
     
     try {
-      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+      await page.setViewport({ width: 1920, height: 1080 });
       
       const cityFormatted = criteria.city.toLowerCase()
         .replace(/ş/g, 's')
@@ -45,15 +43,17 @@ class RentScraper {
       const url = `${config.WEBSITES.OLX}/imobiliare/apartamente-garsoniere-de-inchiriat/${cityFormatted}`;
       console.log('Se accesează URL:', url);
       
+      // Sayfa yüklemesi için daha uzun süre bekle
       await page.goto(url, {
-        waitUntil: 'networkidle0',
-        timeout: 60000
+        waitUntil: ['networkidle0', 'domcontentloaded'],
+        timeout: 90000
       });
 
       console.log('Pagina s-a încărcat, se așteaptă anunțurile...');
 
+      // Daha uzun timeout süresi
       await page.waitForSelector('[data-cy="l-card"]', {
-        timeout: 30000
+        timeout: 60000
       });
 
       console.log('Elemente găsite, se extrag datele...');
@@ -63,68 +63,40 @@ class RentScraper {
         console.log(`${items.length} elemente de anunț găsite`);
         
         return Array.from(items).map(item => {
-          const title = item.querySelector('h6')?.textContent.trim();
-          const priceElement = item.querySelector('[data-testid="ad-price"]');
-          const price = priceElement ? priceElement.textContent.trim() : null;
-          const link = item.querySelector('a')?.href || '';
-          
-          let rooms = null;
-          
-          if (link) {
-            const urlMatch = link.match(/apartament-(\d+)-cam/);
-            if (urlMatch) {
-              rooms = urlMatch[1];
+          try {
+            const title = item.querySelector('h6')?.textContent.trim();
+            const priceElement = item.querySelector('[data-testid="ad-price"]');
+            const price = priceElement ? priceElement.textContent.trim() : null;
+            const link = item.querySelector('a')?.href || '';
+            const location = item.querySelector('[data-testid="location-date"]')?.textContent.split('-')[0].trim();
+            
+            let rooms = null;
+            
+            // URL'den oda sayısını bul
+            if (link) {
+              const urlMatch = link.match(/apartament-(\d+)-cam/);
+              if (urlMatch) rooms = urlMatch[1];
             }
-          }
-          
-          if (!rooms) {
-            const titleText = title?.toLowerCase() || '';
-            if (titleText.includes('camera') || titleText.includes('camere')) {
-              const matches = titleText.match(/(\d+)\s*cam/);
-              if (matches) rooms = matches[1];
-            }
-          }
-          
-          if (!rooms) {
-            const descElement = item.querySelector('.css-efx9z5');
-            if (descElement) {
-              const descText = descElement.textContent.toLowerCase();
-              if (descText.includes('camera') || descText.includes('camere')) {
-                const matches = descText.match(/(\d+)\s*cam/);
+            
+            // Başlıktan oda sayısını bul
+            if (!rooms && title) {
+              const titleText = title.toLowerCase();
+              if (titleText.includes('camera') || titleText.includes('camere')) {
+                const matches = titleText.match(/(\d+)\s*cam/);
                 if (matches) rooms = matches[1];
               }
             }
+            
+            return { title, price, rooms, location, link };
+          } catch (error) {
+            console.error('İlan ayrıştırma hatası:', error);
+            return null;
           }
-
-          const location = item.querySelector('[data-testid="location-date"]')?.textContent.split('-')[0].trim();
-          
-          console.log('Detalii anunț:', { 
-            title, 
-            price, 
-            rooms, 
-            location, 
-            link,
-            rawTitle: title,
-            rawPrice: price,
-            urlRooms: link.match(/apartament-(\d+)-cam/)?.[1] || 'nu s-a găsit'
-          });
-          
-          return { title, price, rooms, location, link };
-        });
+        }).filter(item => item !== null); // Hatalı ilanları filtrele
       });
 
       console.log(`Total ${listings.length} anunțuri găsite`);
-      console.log('Primele 3 exemple de anunțuri:');
-      listings.slice(0, 3).forEach((listing, index) => {
-        console.log(`\nAnunț ${index + 1}:`);
-        console.log('Titlu:', listing.title);
-        console.log('Preț:', listing.price);
-        console.log('Camere:', listing.rooms);
-        console.log('Locație:', listing.location);
-        console.log('Link:', listing.link);
-        console.log('Număr camere din URL:', listing.link.match(/apartament-(\d+)-cam/)?.[1] || 'nu s-a găsit');
-      });
-
+      
       return listings.filter(listing => {
         if (!listing.price) {
           console.log('Anunț fără preț ignorat');
@@ -137,11 +109,8 @@ class RentScraper {
         const priceValid = price >= criteria.minPrice && price <= criteria.maxPrice;
         const roomsValid = rooms >= criteria.minRooms && rooms <= criteria.maxRooms;
 
-        if (!priceValid) {
-          console.log(`Preț în afara intervalului (${criteria.minPrice} > ${price} sau ${price} > ${criteria.maxPrice}): ${listing.title}`);
-        }
-        if (!roomsValid) {
-          console.log(`Număr de camere în afara intervalului (${criteria.minRooms} > ${rooms} sau ${rooms} > ${criteria.maxRooms}): ${listing.title}`);
+        if (!priceValid || !roomsValid) {
+          console.log(`Anunț ignorat - Preț: ${price}€, Camere: ${rooms}`);
         }
 
         return priceValid && roomsValid;
@@ -159,6 +128,7 @@ class RentScraper {
   async close() {
     if (this.browser) {
       await this.browser.close();
+      console.log('Browser închis');
     }
   }
 }
