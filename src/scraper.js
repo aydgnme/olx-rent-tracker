@@ -11,6 +11,7 @@ class RentScraper {
     this.browser = await puppeteer.launch({
       headless: 'new',
       product: 'firefox',
+      executablePath: process.env.FIREFOX_BIN || '/usr/bin/firefox',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
