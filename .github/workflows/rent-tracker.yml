@@ -41,11 +41,18 @@ jobs:
           npm install
           npm ls puppeteer
           
+      - name: Get Chrome path
+        id: chrome
+        run: |
+          CHROME_PATH=$(which chrome)
+          echo "path=$CHROME_PATH" >> $GITHUB_OUTPUT
+          echo "Found Chrome at: $CHROME_PATH"
+          
       - name: Run tracker
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          CHROME_PATH: $(which chrome)
+          CHROME_PATH: ${{ steps.chrome.outputs.path }}
         run: |
           echo "Chrome path: $CHROME_PATH"
           echo "Bot başlatılıyor..."

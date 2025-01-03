@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const config = require('./config');
+const fs = require('fs');
 
 class RentScraper {
   constructor() {
@@ -8,9 +9,17 @@ class RentScraper {
 
   async initialize() {
     console.log('Browser başlatılıyor...');
+    
+    const chromePath = process.env.CHROME_PATH;
+    if (!chromePath || !fs.existsSync(chromePath)) {
+      throw new Error(`Chrome bulunamadı: ${chromePath}`);
+    }
+    
+    console.log('Chrome path:', chromePath);
+    
     this.browser = await puppeteer.launch({
       headless: 'new',
-      executablePath: process.env.CHROME_PATH,
+      executablePath: chromePath,
       defaultViewport: {
         width: 1920,
         height: 1080
