@@ -9,15 +9,13 @@ class RentScraper {
   async initialize() {
     console.log('Browser başlatılıyor...');
     this.browser = await puppeteer.launch({
-      headless: true,
+      headless: 'new',
+      product: 'firefox',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-first-run',
         '--no-zygote',
-        '--single-process',
         '--disable-extensions'
       ]
     });
@@ -28,7 +26,7 @@ class RentScraper {
     const page = await this.browser.newPage();
     
     try {
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36');
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0');
       await page.setViewport({ width: 1920, height: 1080 });
       
       const cityFormatted = criteria.city.toLowerCase()
@@ -43,7 +41,6 @@ class RentScraper {
       const url = `${config.WEBSITES.OLX}/imobiliare/apartamente-garsoniere-de-inchiriat/${cityFormatted}`;
       console.log('Se accesează URL:', url);
       
-      // Sayfa yüklemesi için daha uzun süre bekle
       await page.goto(url, {
         waitUntil: ['networkidle0', 'domcontentloaded'],
         timeout: 90000
@@ -51,7 +48,6 @@ class RentScraper {
 
       console.log('Pagina s-a încărcat, se așteaptă anunțurile...');
 
-      // Daha uzun timeout süresi
       await page.waitForSelector('[data-cy="l-card"]', {
         timeout: 60000
       });
@@ -72,13 +68,11 @@ class RentScraper {
             
             let rooms = null;
             
-            // URL'den oda sayısını bul
             if (link) {
               const urlMatch = link.match(/apartament-(\d+)-cam/);
               if (urlMatch) rooms = urlMatch[1];
             }
             
-            // Başlıktan oda sayısını bul
             if (!rooms && title) {
               const titleText = title.toLowerCase();
               if (titleText.includes('camera') || titleText.includes('camere')) {
@@ -92,7 +86,7 @@ class RentScraper {
             console.error('İlan ayrıştırma hatası:', error);
             return null;
           }
-        }).filter(item => item !== null); // Hatalı ilanları filtrele
+        }).filter(item => item !== null);
       });
 
       console.log(`Total ${listings.length} anunțuri găsite`);
