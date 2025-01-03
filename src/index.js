@@ -19,7 +19,7 @@ class RentTracker {
       const dataDir = path.dirname(this.seenListingsFile);
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
-        console.log(`Data dizini oluşturuldu: ${dataDir}`);
+        console.log(`Data directory created: ${dataDir}`);
       }
 
       // Dosya varsa oku
@@ -27,13 +27,13 @@ class RentTracker {
         const data = fs.readFileSync(this.seenListingsFile, 'utf8');
         const listings = JSON.parse(data);
         this.lastListings = new Set(listings);
-        console.log(`${this.lastListings.size} adet önceden görülmüş ilan yüklendi`);
+        console.log(`Loaded ${this.lastListings.size} previously seen listings`);
       } else {
         fs.writeFileSync(this.seenListingsFile, '[]', { mode: 0o666 });
-        console.log('Yeni görülen ilanlar dosyası oluşturuldu');
+        console.log('Created new seen listings file');
       }
     } catch (error) {
-      console.error('Görülen ilanlar yüklenirken hata:', error);
+      console.error('Error loading seen listings:', error);
       // Hata durumunda memory'de tutmaya devam et
       this.lastListings = new Set();
     }
@@ -44,14 +44,14 @@ class RentTracker {
       const dataDir = path.dirname(this.seenListingsFile);
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true, mode: 0o777 });
-        console.log(`Data dizini oluşturuldu: ${dataDir}`);
+        console.log(`Data directory created: ${dataDir}`);
       }
 
       const listings = Array.from(this.lastListings);
       fs.writeFileSync(this.seenListingsFile, JSON.stringify(listings, null, 2), { mode: 0o666 });
-      console.log(`${listings.length} adet görülen ilan kaydedildi`);
+      console.log(`Saved ${listings.length} seen listings`);
     } catch (error) {
-      console.error('Görülen ilanlar kaydedilirken hata:', error);
+      console.error('Error saving seen listings:', error);
       // Hata durumunda sessizce devam et
     }
   }
@@ -62,20 +62,20 @@ class RentTracker {
       
       // Send initial status message
       await this.notifier.sendMessage({
-        title: '🤖 Bot Activ',
+        title: '🤖 Bot Active',
         location: config.DEFAULT_CRITERIA.city,
         price: `${config.DEFAULT_CRITERIA.minPrice}€ - ${config.DEFAULT_CRITERIA.maxPrice}€`,
-        rooms: `${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms} camere`,
+        rooms: `${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms} rooms`,
         link: config.WEBSITES.OLX
       });
 
-      console.log('🤖 Bot-ul a pornit!');
-      console.log(`📍 Oraș căutat: ${config.DEFAULT_CRITERIA.city}`);
-      console.log(`💰 Interval de preț: ${config.DEFAULT_CRITERIA.minPrice}€ - ${config.DEFAULT_CRITERIA.maxPrice}€`);
-      console.log(`🚪 Camere: ${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms}`);
+      console.log('🤖 Bot started!');
+      console.log(`📍 City: ${config.DEFAULT_CRITERIA.city}`);
+      console.log(`💰 Price range: ${config.DEFAULT_CRITERIA.minPrice}€ - ${config.DEFAULT_CRITERIA.maxPrice}€`);
+      console.log(`🚪 Rooms: ${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms}`);
       
       // Check listings
-      console.log('\n🔍 Se verifică anunțurile...');
+      console.log('\n🔍 Checking listings...');
       await this.checkNewListings();
       
       // Save seen listings before exit
@@ -83,20 +83,20 @@ class RentTracker {
       
       // Close browser and exit after completion
       await this.scraper.close();
-      console.log('\n✅ Procesul s-a încheiat, se închide...');
+      console.log('\n✅ Process completed, shutting down...');
       process.exit(0);
       
     } catch (error) {
-      console.error('❌ Eroare de inițializare a botului:', error);
+      console.error('❌ Bot initialization error:', error);
       process.exit(1);
     }
   }
 
   async checkNewListings() {
     try {
-      console.log('\n🔍 Se verifică anunțurile...');
+      console.log('\n🔍 Checking listings...');
       const listings = await this.scraper.scrapeOLX(config.DEFAULT_CRITERIA);
-      console.log(`\n✅ ${listings.length} anunțuri găsite`);
+      console.log(`\n✅ Found ${listings.length} listings`);
       
       // Filter and notify about new listings
       let newListingCount = 0;
@@ -105,17 +105,17 @@ class RentTracker {
         
         if (!this.lastListings.has(listingKey) && 
             this.matchesCriteria(listing, config.DEFAULT_CRITERIA)) {
-          console.log('\n📨 Se trimite notificare pentru anunț nou:', listing.title);
+          console.log('\n📨 Sending notification for new listing:', listing.title);
           await this.notifier.sendMessage(listing);
           this.lastListings.add(listingKey);
           newListingCount++;
         }
       }
       
-      console.log(`\n📊 Rezumat: ${newListingCount} anunțuri noi notificate`);
+      console.log(`\n📊 Summary: ${newListingCount} new listings notified`);
       
     } catch (error) {
-      console.error('❌ Eroare la verificarea anunțurilor:', error);
+      console.error('❌ Error checking listings:', error);
     }
   }
 
@@ -128,26 +128,26 @@ class RentTracker {
       const priceValid = price >= criteria.minPrice && price <= criteria.maxPrice;
       const roomsValid = rooms >= criteria.minRooms && rooms <= criteria.maxRooms;
 
-      console.log('\nVerificare criterii:');
-      console.log(`Anunț: ${listing.title}`);
-      console.log(`Preț: ${price}€ (Valid: ${priceValid ? 'Da' : 'Nu'})`);
-      console.log(`Camere: ${rooms} (Valid: ${roomsValid ? 'Da' : 'Nu'})`);
-      console.log(`Interval de preț: ${criteria.minPrice}€ - ${criteria.maxPrice}€`);
-      console.log(`Interval camere: ${criteria.minRooms} - ${criteria.maxRooms}`);
+      console.log('\nChecking criteria:');
+      console.log(`Listing: ${listing.title}`);
+      console.log(`Price: ${price}€ (Valid: ${priceValid ? 'Yes' : 'No'})`);
+      console.log(`Rooms: ${rooms} (Valid: ${roomsValid ? 'Yes' : 'No'})`);
+      console.log(`Price range: ${criteria.minPrice}€ - ${criteria.maxPrice}€`);
+      console.log(`Room range: ${criteria.minRooms} - ${criteria.maxRooms}`);
 
       return priceValid && roomsValid;
     } catch (error) {
-      console.error('Eroare la verificarea criteriilor:', error);
-      console.error('Anunț cu eroare:', listing);
+      console.error('Error checking criteria:', error);
+      console.error('Listing with error:', listing);
       return false;
     }
   }
 }
 
 // Start the tracker
-console.log('🚀 Bot-ul pornește...');
+console.log('🚀 Starting bot...');
 const tracker = new RentTracker();
 tracker.start().catch(error => {
-  console.error('❌ Eroare critică:', error);
+  console.error('❌ Critical error:', error);
   process.exit(1);
 }); 

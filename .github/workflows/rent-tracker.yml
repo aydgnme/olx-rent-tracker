@@ -48,13 +48,28 @@ jobs:
           echo "path=$CHROME_PATH" >> $GITHUB_OUTPUT
           echo "Found Chrome at: $CHROME_PATH"
           
+      - name: Create data directory
+        run: |
+          mkdir -p data
+          touch data/seen-listings.json
+          echo "[]" > data/seen-listings.json
+          
       - name: Run tracker
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           CHROME_PATH: ${{ steps.chrome.outputs.path }}
+          DATA_DIR: ${{ github.workspace }}/data
         run: |
           echo "Chrome path: $CHROME_PATH"
           echo "Bot başlatılıyor..."
           node src/index.js
-        continue-on-error: false 
+          
+      - name: Commit seen listings
+        if: success()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/seen-listings.json
+          git commit -m "Update seen listings [skip ci]" || echo "No changes to commit"
+          git push 
