@@ -7,14 +7,15 @@ node_modules/
 # Logs
 *.log
 
-# Data directory
-data/
-seen-listings.json
-
 # IDE
 .vscode/
 .idea/
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Data directory except seen-listings.json
+data/*
+!data/
+!data/seen-listings.json 
