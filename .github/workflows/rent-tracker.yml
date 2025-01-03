@@ -33,7 +33,9 @@ jobs:
             ${{ runner.os }}-npm-
           
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm install
+          npm ls puppeteer
         
       - name: Install Firefox
         run: |
@@ -45,6 +47,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           PUPPETEER_PRODUCT: firefox
+          PUPPETEER_SKIP_DOWNLOAD: true
         run: |
           echo "Bot başlatılıyor..."
           node src/index.js

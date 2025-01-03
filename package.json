@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "postinstall": "node node_modules/puppeteer/install.js"
+    "start": "node src/index.js"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -14,8 +13,8 @@
   "license": "ISC",
   "description": "OLX Rent Tracker for Romania",
   "dependencies": {
-    "axios": "^1.7.9",
-    "dotenv": "^16.4.7",
-    "puppeteer": "^22.3.0"
+    "axios": "1.7.9",
+    "dotenv": "16.4.7",
+    "puppeteer": "22.3.0"
   }
 }
