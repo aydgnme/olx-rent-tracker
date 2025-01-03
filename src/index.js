@@ -98,6 +98,9 @@ class RentTracker {
       const listings = await this.scraper.scrapeOLX(config.DEFAULT_CRITERIA);
       console.log(`\n✅ Found ${listings.length} listings`);
       
+      // Check for removed listings and delete their messages
+      await this.notifier.checkAndDeleteRemovedListings(listings);
+      
       // Filter and notify about new listings
       let newListingCount = 0;
       for (const listing of listings) {
