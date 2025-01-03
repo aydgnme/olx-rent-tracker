@@ -10,8 +10,8 @@ class RentScraper {
   async initialize() {
     console.log('Browser başlatılıyor...');
     
-    const chromePath = process.env.CHROME_PATH;
-    if (!chromePath || !fs.existsSync(chromePath)) {
+    const chromePath = process.env.CHROME_PATH || '/usr/bin/google-chrome-stable';
+    if (!fs.existsSync(chromePath)) {
       throw new Error(`Chrome bulunamadı: ${chromePath}`);
     }
     
@@ -33,7 +33,9 @@ class RentScraper {
         '--disable-extensions',
         '--window-size=1920,1080',
         '--hide-scrollbars',
-        '--mute-audio'
+        '--mute-audio',
+        '--disable-notifications',
+        '--no-first-run'
       ]
     });
     console.log('Browser başlatıldı');
