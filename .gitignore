@@ -1,3 +1,20 @@
+# Dependencies
 node_modules/
+
+# Environment variables
 .env
-*.png 
+
+# Logs
+*.log
+
+# Data directory
+data/
+seen-listings.json
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db 

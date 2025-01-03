@@ -1,12 +1,49 @@
 const RentScraper = require('./scraper');
 const TelegramNotifier = require('./telegram');
 const config = require('./config');
+const fs = require('fs');
+const path = require('path');
 
 class RentTracker {
   constructor() {
     this.scraper = new RentScraper();
     this.notifier = new TelegramNotifier();
+    this.seenListingsFile = path.join(__dirname, '../data/seen-listings.json');
     this.lastListings = new Set();
+    this.loadSeenListings();
+  }
+
+  loadSeenListings() {
+    try {
+      // data dizini yoksa oluştur
+      const dataDir = path.dirname(this.seenListingsFile);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+
+      // Dosya varsa oku
+      if (fs.existsSync(this.seenListingsFile)) {
+        const data = fs.readFileSync(this.seenListingsFile, 'utf8');
+        const listings = JSON.parse(data);
+        this.lastListings = new Set(listings);
+        console.log(`${this.lastListings.size} adet önceden görülmüş ilan yüklendi`);
+      } else {
+        fs.writeFileSync(this.seenListingsFile, '[]');
+        console.log('Yeni görülen ilanlar dosyası oluşturuldu');
+      }
+    } catch (error) {
+      console.error('Görülen ilanlar yüklenirken hata:', error);
+    }
+  }
+
+  saveSeenListings() {
+    try {
+      const listings = Array.from(this.lastListings);
+      fs.writeFileSync(this.seenListingsFile, JSON.stringify(listings, null, 2));
+      console.log(`${listings.length} adet görülen ilan kaydedildi`);
+    } catch (error) {
+      console.error('Görülen ilanlar kaydedilirken hata:', error);
+    }
   }
 
   async start() {
@@ -30,6 +67,9 @@ class RentTracker {
       // Check listings
       console.log('\n🔍 Se verifică anunțurile...');
       await this.checkNewListings();
+      
+      // Save seen listings before exit
+      this.saveSeenListings();
       
       // Close browser and exit after completion
       await this.scraper.close();
