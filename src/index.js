@@ -8,7 +8,7 @@ class RentTracker {
   constructor() {
     this.scraper = new RentScraper();
     this.notifier = new TelegramNotifier();
-    this.seenListingsFile = path.join(__dirname, '../data/seen-listings.json');
+    this.seenListingsFile = path.join(process.env.DATA_DIR || path.join(__dirname, '../data'), 'seen-listings.json');
     this.lastListings = new Set();
     this.loadSeenListings();
   }
@@ -19,6 +19,7 @@ class RentTracker {
       const dataDir = path.dirname(this.seenListingsFile);
       if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
+        console.log(`Data dizini oluşturuldu: ${dataDir}`);
       }
 
       // Dosya varsa oku
@@ -28,21 +29,30 @@ class RentTracker {
         this.lastListings = new Set(listings);
         console.log(`${this.lastListings.size} adet önceden görülmüş ilan yüklendi`);
       } else {
-        fs.writeFileSync(this.seenListingsFile, '[]');
+        fs.writeFileSync(this.seenListingsFile, '[]', { mode: 0o666 });
         console.log('Yeni görülen ilanlar dosyası oluşturuldu');
       }
     } catch (error) {
       console.error('Görülen ilanlar yüklenirken hata:', error);
+      // Hata durumunda memory'de tutmaya devam et
+      this.lastListings = new Set();
     }
   }
 
   saveSeenListings() {
     try {
+      const dataDir = path.dirname(this.seenListingsFile);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true, mode: 0o777 });
+        console.log(`Data dizini oluşturuldu: ${dataDir}`);
+      }
+
       const listings = Array.from(this.lastListings);
-      fs.writeFileSync(this.seenListingsFile, JSON.stringify(listings, null, 2));
+      fs.writeFileSync(this.seenListingsFile, JSON.stringify(listings, null, 2), { mode: 0o666 });
       console.log(`${listings.length} adet görülen ilan kaydedildi`);
     } catch (error) {
       console.error('Görülen ilanlar kaydedilirken hata:', error);
+      // Hata durumunda sessizce devam et
     }
   }
 

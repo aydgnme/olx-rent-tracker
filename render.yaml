@@ -18,7 +18,9 @@ services:
         value: /usr/bin/chromium
       - key: DISPLAY
         value: ":99.0"
+      - key: DATA_DIR
+        value: /app/data
     disk:
       name: chrome-data
-      mountPath: /tmp
+      mountPath: /app/data
       sizeGB: 1 

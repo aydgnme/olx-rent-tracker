@@ -14,7 +14,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
     && mkdir -p /home/pptruser/Downloads \
-    && chown -R pptruser:pptruser /home/pptruser
+    && mkdir -p /app/data \
+    && chown -R pptruser:pptruser /home/pptruser \
+    && chown -R pptruser:pptruser /app
 
 # Çalışma dizini oluştur
 WORKDIR /app
@@ -27,6 +29,7 @@ RUN npm install
 
 # Kaynak kodları kopyala
 COPY . .
+RUN chown -R pptruser:pptruser /app/data
 
 # pptruser'a geç
 USER pptruser
