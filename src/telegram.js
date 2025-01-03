@@ -35,6 +35,8 @@ class TelegramNotifier {
     }
 
     return `
+👋 Hey 
+
 🏠 Apartament nou găsit!
 📍 Locație: ${listing.location}
 💰 Preț: ${listing.price}
