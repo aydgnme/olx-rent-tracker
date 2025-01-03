@@ -6,7 +6,9 @@ services:
     plan: starter
     scaling:
       minInstances: 1
-      maxInstances: 1
+      maxInstances: 2
+      targetMemoryPercent: 80
+      targetCPUPercent: 80
     envVars:
       - key: TELEGRAM_BOT_TOKEN
         sync: false
