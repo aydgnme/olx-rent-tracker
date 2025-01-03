@@ -9,16 +9,26 @@ class RentScraper {
   async initialize() {
     console.log('Browser başlatılıyor...');
     this.browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       product: 'firefox',
-      executablePath: process.env.FIREFOX_BIN || '/usr/bin/firefox',
+      executablePath: process.env.FIREFOX_BIN || '/snap/bin/firefox',
+      defaultViewport: {
+        width: 1920,
+        height: 1080
+      },
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--no-zygote',
-        '--disable-extensions'
-      ]
+        '--disable-extensions',
+        '--window-size=1920,1080'
+      ],
+      timeout: 60000,
+      env: {
+        ...process.env,
+        MOZ_HEADLESS: '1'
+      }
     });
     console.log('Browser başlatıldı');
   }
@@ -28,7 +38,6 @@ class RentScraper {
     
     try {
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:123.0) Gecko/20100101 Firefox/123.0');
-      await page.setViewport({ width: 1920, height: 1080 });
       
       const cityFormatted = criteria.city.toLowerCase()
         .replace(/ş/g, 's')
@@ -43,7 +52,7 @@ class RentScraper {
       console.log('Se accesează URL:', url);
       
       await page.goto(url, {
-        waitUntil: ['networkidle0', 'domcontentloaded'],
+        waitUntil: ['networkidle0', 'load', 'domcontentloaded'],
         timeout: 90000
       });
 
