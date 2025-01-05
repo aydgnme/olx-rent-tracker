@@ -31,11 +31,29 @@ class RentTracker {
       } else {
         fs.writeFileSync(this.seenListingsFile, '[]', { mode: 0o666 });
         console.log('Created new seen listings file');
+        
+        // İlk çalıştırma olduğu için başlangıç mesajı gönder
+        this.sendInitialMessage();
       }
     } catch (error) {
       console.error('Error loading seen listings:', error);
       // Hata durumunda memory'de tutmaya devam et
       this.lastListings = new Set();
+    }
+  }
+
+  async sendInitialMessage() {
+    try {
+      await this.notifier.sendMessage({
+        title: '🤖 Bot Active',
+        location: config.DEFAULT_CRITERIA.city,
+        price: `${config.DEFAULT_CRITERIA.minPrice}€ - ${config.DEFAULT_CRITERIA.maxPrice}€`,
+        rooms: `${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms} rooms`,
+        link: config.WEBSITES.OLX
+      });
+      console.log('Sent initial status message');
+    } catch (error) {
+      console.error('Error sending initial message:', error);
     }
   }
 
@@ -59,15 +77,6 @@ class RentTracker {
   async start() {
     try {
       await this.scraper.initialize();
-      
-      // Send initial status message
-      await this.notifier.sendMessage({
-        title: '🤖 Bot Active',
-        location: config.DEFAULT_CRITERIA.city,
-        price: `${config.DEFAULT_CRITERIA.minPrice}€ - ${config.DEFAULT_CRITERIA.maxPrice}€`,
-        rooms: `${config.DEFAULT_CRITERIA.minRooms}-${config.DEFAULT_CRITERIA.maxRooms} rooms`,
-        link: config.WEBSITES.OLX
-      });
 
       console.log('🤖 Bot started!');
       console.log(`📍 City: ${config.DEFAULT_CRITERIA.city}`);
