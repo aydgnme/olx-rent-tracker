@@ -55,19 +55,7 @@ class TelegramNotifier {
   }
 
   formatMessage(listing) {
-    if (listing.title === '🤖 Bot Active') {
-      return `
-🤖 Bot-ul de căutare este activ!
-
-📍 Oraș căutat: ${listing.location}
-💰 Interval de preț: ${listing.price}
-🚪 Camere: ${listing.rooms}
-🔄 Interval de verificare: ${config.SCRAPING_INTERVAL / 60000} minute
-
-🔍 Se caută anunțuri noi...
-      `.trim();
-    }
-
+    // Removed the section that sends a message when the bot is active
     return `
 👋 Hey 
 
