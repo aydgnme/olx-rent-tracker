@@ -2,7 +2,7 @@
 require('dotenv').config();
 
 // Validate required environment variables
-const requiredEnvVars = ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID'];
+const requiredEnvVars = ['WHATSAPP_NUMBER'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
@@ -83,9 +83,7 @@ module.exports = {
   // Scraping settings
   SCRAPING_INTERVAL,
   
-  // Telegram settings
-  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
-  TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
+  // WhatsApp settings
   WHATSAPP_NUMBER: process.env.WHATSAPP_NUMBER, // Format: 905123456789 (with country code)
   
   // External services
