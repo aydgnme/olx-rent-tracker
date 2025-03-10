@@ -18,4 +18,10 @@ Thumbs.db
 # Data directory except seen-listings.json
 data/*
 !data/
-!data/seen-listings.json 
+!data/seen-listings.json
+
+# WhatsApp session
+.wwebjs_auth/*
+!.wwebjs_auth/
+.wwebjs_cache/*
+!.wwebjs_cache/ 

@@ -86,6 +86,7 @@ module.exports = {
   // Telegram settings
   TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN,
   TELEGRAM_CHAT_ID: process.env.TELEGRAM_CHAT_ID,
+  WHATSAPP_NUMBER: process.env.WHATSAPP_NUMBER, // Format: 905123456789 (with country code)
   
   // External services
   WEBSITES,

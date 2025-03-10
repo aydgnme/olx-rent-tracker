@@ -1,5 +1,5 @@
 const RentScraper = require('./scraper');
-const TelegramNotifier = require('./telegram');
+const WhatsAppNotifier = require('./whatsapp');
 const config = require('./config');
 const fs = require('fs');
 const path = require('path');
@@ -7,7 +7,7 @@ const path = require('path');
 class RentTracker {
   constructor() {
     this.scraper = new RentScraper();
-    this.notifier = new TelegramNotifier();
+    this.notifier = new WhatsAppNotifier();
     this.seenListingsFile = path.join(process.env.DATA_DIR || path.join(__dirname, '../data'), 'seen-listings.json');
     this.lastListings = new Set();
     this.loadSeenListings();

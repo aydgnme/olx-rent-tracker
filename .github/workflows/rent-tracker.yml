@@ -27,15 +27,17 @@ jobs:
         with:
           chrome-version: stable
       
-      - name: Cache dependencies
+      - name: Cache dependencies and sessions
         uses: actions/cache@v4
         with:
           path: |
             ~/.npm
             ~/.cache/puppeteer
-          key: ${{ runner.os }}-npm-deps-${{ hashFiles('package-lock.json') }}
+            ./.wwebjs_auth
+            ./.wwebjs_cache
+          key: ${{ runner.os }}-deps-sessions-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-npm-deps-
+            ${{ runner.os }}-deps-sessions-
             ${{ runner.os }}-
           
       - name: Install dependencies
@@ -59,20 +61,21 @@ jobs:
           
       - name: Run tracker
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           CHROME_PATH: ${{ steps.chrome.outputs.path }}
           DATA_DIR: ${{ github.workspace }}/data
+          WHATSAPP_NUMBER: ${{ secrets.WHATSAPP_NUMBER }}
         run: |
           echo "Chrome path: $CHROME_PATH"
           echo "Bot başlatılıyor..."
           node src/index.js
           
-      - name: Commit seen listings
+      - name: Commit changes
         if: success()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add -f data/seen-listings.json
-          git commit -m "Update seen listings [skip ci]" || echo "No changes to commit"
+          git add -f .wwebjs_auth || true
+          git add -f .wwebjs_cache || true
+          git commit -m "Update seen listings and WhatsApp session [skip ci]" || echo "No changes to commit"
           git push 
