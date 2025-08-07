@@ -24,7 +24,8 @@ const DEFAULT_CRITERIA = {
   maxPrice: parseInt(process.env.SEARCH_MAX_PRICE || '400'),
   minPrice: parseInt(process.env.SEARCH_MIN_PRICE || '200'),
   minRooms: parseInt(process.env.SEARCH_MIN_ROOMS || '2'),
-  maxRooms: parseInt(process.env.SEARCH_MAX_ROOMS || '3')
+  maxRooms: parseInt(process.env.SEARCH_MAX_ROOMS || '3'),
+  nullRooms: parseInt(process.env.SEARCH_MIN_ROOMS || '0'),
 };
 
 // External service configuration
